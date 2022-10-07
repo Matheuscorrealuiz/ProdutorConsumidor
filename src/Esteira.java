@@ -1,35 +1,40 @@
 import java.util.LinkedList;
+import java.util.Queue;
 
 public class Esteira {
 
-    private LinkedList<Produto> esteira;
-    int quantidadeElementos = 0;
-    int tamanhoFila = 3;
+    private Queue<Produto> esteira;
 
-    public Esteira(){
+    int quantidadeElementos = 0;
+    private final int tamanhoEsteira = 1;
+
+    public Esteira() {
         this.esteira = new LinkedList<>();
     }
 
     public void inserirProduto(Produto produto) {
-        this.esteira.add(produto);
-
-        this.quantidadeElementos++;
+        synchronized (esteira) {
+            esteira.add(produto);
+            this.quantidadeElementos++;
+        }
     }
 
     public Produto removerProduto() {
-        this.quantidadeElementos--;
+        synchronized (esteira) {
+            this.quantidadeElementos--;
 
-        return this.esteira.removeFirst();
+            return esteira.poll();
+        }
     }
 
-    public boolean verificaEstaCheia(){
-        if (this.quantidadeElementos == this.tamanhoFila) {
+    public boolean verificaEstaCheia() {
+        if (this.quantidadeElementos == this.tamanhoEsteira) {
             return true;
         }
         return false;
     }
 
-    public boolean verificaEstaVazia(){
+    public boolean verificaEstaVazia() {
         if (this.quantidadeElementos == 0) {
             return true;
         }

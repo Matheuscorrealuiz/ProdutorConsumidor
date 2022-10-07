@@ -1,59 +1,64 @@
+import java.util.Random;
+
 public class ProdutorConsumidor {
     Esteira esteira;
 
-    public ProdutorConsumidor(Esteira esteira)
-    {
+    public ProdutorConsumidor(Esteira esteira) {
         this.esteira = esteira;
     }
 
     public void produzir() {
-        Produto produto = new Produto();
-
-        while(true){
-            synchronized(this)
-            {
+        while (true) {
+            synchronized (this) {
+                Produto produto = new Produto();
                 produto.defineProduto(produto);
 
-                while(esteira.verificaEstaCheia())
-                {
-                    System.out.println("Produtores aguardando mais espaco na esteira...");
-                    try
-                    {
+                while (esteira.verificaEstaCheia()) {
+                    try {
                         wait();
-                        Thread.sleep(3000);
-                    }
-
-                    catch (InterruptedException e){}
+                        Random random = new Random();
+                        Thread.sleep(random.nextInt(2000));
+                    } catch (InterruptedException e) {}
                 }
+
                 esteira.inserirProduto(produto);
 
-                System.out.println("Produto produzido: "+produto.getTipo());
+                produto.esperaTempoAleatorioProdutor();
 
-                notify();
+                System.out.println("------------");
+                System.out.println(Thread.currentThread().getName() + " produziu: "
+                        + produto.getTipo() + " " + "(" + produto.getSimbolo() + ")" + " Qualidade: " + produto.getQualidade() + " Tempo: " + produto.getTempo());
+
+                notifyAll();
             }
         }
     }
 
-    public void consumir()
-    {
-        while(true)
-        {
-            synchronized (this)
-            {
-                while(esteira.verificaEstaVazia())
-                {
-                    System.out.println("Consumidores esperando por mais produtos...");
+    public void consumir() {
+        while (true) {
+            synchronized (this) {
+                Produto produto;
 
-                    try{
+                while (esteira.verificaEstaVazia()) {
+                    try {
                         wait();
-                    }
-                    catch (InterruptedException e){}
+                        Random random = new Random();
+                        Thread.sleep(random.nextInt(2000));
+                    } catch (InterruptedException e) {}
                 }
-                Produto produto = esteira.removerProduto();
-                System.out.println(produto.getTipo()+" consumido(a)");
 
-                notify();
+                produto = esteira.removerProduto();
+
+                produto.esperaTempoAleatorioConsumidor();
+
+                System.out.println("------------");
+                System.out.println(Thread.currentThread().getName() + " consumiu: "
+                        + produto.getTipo() + " " + "(" + produto.getSimbolo() + ")" + " Qualidade: " + produto.getQualidade() + " Tempo: " + produto.getTempo());
+
+                notifyAll();
             }
         }
     }
 }
+
+
